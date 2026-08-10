@@ -1,25 +1,29 @@
 #include <iostream>
-#include "include/game.h"
 
-/**
- * @file main.cpp
- * @brief Program entry point
- */
+#include "src/includes/piece.hpp"
+
+void print_moves(Piece piece) {
+    std::cout << piece.getName() << ": ";
+    for (auto move : piece.getMoves()) {
+        std::cout << "(" << move.first << ", " << move.second << ") ";
+    }
+    std::cout << std::endl;
+}
+
 int main() {
-    try {
-        system("chcp 65001");
-        Game game;
-        game.startMenu();
-    }
-    catch(const logic_error& e) {
-        if(string(e.what()) == "exit") {
-            return EXIT_SUCCESS;
-        } else {
-            cerr << "Caught logic_error exception: " << e.what() << '\n';
-        }
-    }
-    catch(const exception& e) {
-            cerr << "Caught an exception of type " << typeid(e).name() << ": " << e.what() << '\n';
-    }
-    return 0;
+    Piece pawn(Color::White, Name::Pawn);
+    Piece pawn2(Color::Black, Name::Pawn);
+    Piece knight(Color::White, Name::Knight);
+    Piece bishop(Color::White, Name::Bishop);
+    Piece rook(Color::White, Name::Rook);
+    Piece queen(Color::White, Name::Queen);
+    Piece king(Color::White, Name::King);
+
+    print_moves(pawn);
+    print_moves(pawn2);
+    print_moves(knight);
+    print_moves(bishop);
+    print_moves(rook);
+    print_moves(queen);
+    print_moves(king);
 }
