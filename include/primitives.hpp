@@ -8,6 +8,8 @@
 
 #include <cstdint>
 
+namespace chess {
+
 enum struct Square : uint8_t {
     A1, B1, C1, D1, E1, F1, G1, H1,
     A2, B2, C2, D2, E2, F2, G2, H2,
@@ -38,5 +40,20 @@ enum struct Color : uint8_t {
     White,
     Black
 };
+
+[[nodiscard]] constexpr int idx(Color c) { return static_cast<int>(c); }
+
+enum struct Direction : uint8_t {
+    North,
+    NorthEast,
+    East,
+    SouthEast,
+    South,
+    SouthWest,
+    West,
+    NorthWest
+};
+
+} // namespace chess
 
 #endif // PRIMITIVES_HPP

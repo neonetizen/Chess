@@ -7,4 +7,10 @@
 #ifndef DEBUG_HPP
 #define DEBUG_HPP
 
+#include "position.hpp"
+
+namespace chess {
+
+} // namespace chess
+
 #endif // DEBUG_HPP

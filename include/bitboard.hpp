@@ -8,11 +8,20 @@
 
 #include <cstdint>
 
-namespace chess {
+#include "primitives.hpp"
 
-    using Bitboard = std::uint64_t;
-    constexpr Bitboard BB_ALL  = 0xFFFFFFFFFFFFFFFFULL;
-    constexpr Bitboard BB_NONE = 0;
+namespace chess {
+using Bitboard = std::uint64_t;
+
+constexpr Bitboard BB_ALL  = ~0; // universal set
+constexpr Bitboard BB_NONE = 0;  // empty set
+
+constexpr Bitboard operator|(Bitboard bb, Square sq) { return bb | static_cast<uint64_t>(sq); }
+constexpr Bitboard operator&(Bitboard bb, Square sq) { return bb & static_cast<uint64_t>(sq); }
+
+constexpr Bitboard shift(Bitboard bb, Direction dir) { return bb << static_cast<uint64_t>(dir); }
+constexpr Bitboard square_bb(Square sq) { return BB_NONE << static_cast<uint64_t>(sq); }
+
 
 } // namespace chess
 
