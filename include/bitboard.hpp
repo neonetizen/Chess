@@ -11,16 +11,30 @@
 #include "primitives.hpp"
 
 namespace chess {
+/*
+ * 0 0 0 0 0 0 0 0   8
+ * 0 0 0 0 0 0 0 0   7 
+ * 0 0 0 0 0 0 0 0   6
+ * 0 0 0 0 0 0 0 0   5
+ * 0 0 0 0 0 0 0 0   4
+ * 0 0 0 0 0 0 0 0   3
+ * 0 0 0 0 0 0 0 0   2
+ * 0 0 0 0 0 0 0 0   1
+ *
+ * H G F E D C B A
+ */
+
+ // :)
 using Bitboard = std::uint64_t;
 
 constexpr Bitboard BB_ALL  = ~0; // universal set
 constexpr Bitboard BB_NONE = 0;  // empty set
 
-constexpr Bitboard operator|(Bitboard bb, Square sq) { return bb | static_cast<uint64_t>(sq); }
-constexpr Bitboard operator&(Bitboard bb, Square sq) { return bb & static_cast<uint64_t>(sq); }
+constexpr Bitboard operator|(Bitboard bb, Square sq) { return bb | peel(sq); }
+constexpr Bitboard operator&(Bitboard bb, Square sq) { return bb & peel(sq); }
 
-constexpr Bitboard shift(Bitboard bb, Direction dir) { return bb << static_cast<uint64_t>(dir); }
-constexpr Bitboard square_bb(Square sq) { return BB_NONE << static_cast<uint64_t>(sq); }
+constexpr Bitboard shift(Bitboard bb, Direction dir) { return bb << peel(dir); }
+constexpr Bitboard square_bb(Square sq) { return Bitboard{1} << peel(sq); }
 
 
 } // namespace chess

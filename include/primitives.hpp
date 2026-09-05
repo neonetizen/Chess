@@ -43,6 +43,7 @@ enum struct Color : uint8_t {
 };
 
 enum struct Direction : uint8_t {
+    None,
     North,
     NorthEast,
     East,
@@ -58,11 +59,11 @@ enum struct Direction : uint8_t {
  * querying rights: rights = castling & (right | rights...)
  */
 enum CastlingRights : uint8_t {
-    NO_CASTLING = 0,
-    WHITE_OO    = 1, // 0b0001
-    WHITE_OOO   = 2, // 0b0010
-    BLACK_OO    = 4, // 0b0100
-    BLACK_OOO   = 8, // 0b1000
+    NO_CASTLING = 0b0000,
+    WHITE_OO    = 0b0001,
+    WHITE_OOO   = 0b0010,
+    BLACK_OO    = 0b0100,
+    BLACK_OOO   = 0b1000,
 
     ALL_CASTLING = WHITE_OO | WHITE_OOO | BLACK_OO | BLACK_OOO
 };
