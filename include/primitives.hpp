@@ -7,6 +7,7 @@
 #define PRIMITIVES_HPP
 
 #include <cstdint>
+#include <type_traits>
 
 namespace chess {
 
@@ -41,8 +42,6 @@ enum struct Color : uint8_t {
     Black
 };
 
-[[nodiscard]] constexpr int idx(Color c) { return static_cast<int>(c); }
-
 enum struct Direction : uint8_t {
     North,
     NorthEast,
@@ -53,6 +52,29 @@ enum struct Direction : uint8_t {
     West,
     NorthWest
 };
+
+/*
+ * clearing a right: castling &= ~WHITE_OO
+ * querying rights: rights = castling & (right | rights...)
+ */
+enum CastlingRights : uint8_t {
+    NO_CASTLING = 0,
+    WHITE_OO    = 1, // 0b0001
+    WHITE_OOO   = 2, // 0b0010
+    BLACK_OO    = 4, // 0b0100
+    BLACK_OOO   = 8, // 0b1000
+
+    ALL_CASTLING = WHITE_OO | WHITE_OOO | BLACK_OO | BLACK_OOO
+};
+
+/*
+ * function to peel back enums to their integral types
+ */
+template<typename T>
+    requires std::is_enum_v<T>
+constexpr auto peel(T e) -> std::underlying_type_t<T> { 
+    return static_cast<std::underlying_type_t<T>>(e);
+}
 
 } // namespace chess
 
