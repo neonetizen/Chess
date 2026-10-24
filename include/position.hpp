@@ -1,18 +1,7 @@
-/*
- * TODO:
- *   - position struct for:
- *     - create mailbox array Piece board[64]
- *     - bitboard per color, per type
- *     - occupancy bitboard by color
- *     - occupied() derived for both colors
- *     - side to move
- *     - castling rights
- *     - en passsant square
- *     - halfmove_clock
- *     - full move number
- */
 #ifndef POSITION_HPP
 #define POSITION_HPP
+
+#include <cassert>
 
 #include "bitboard.hpp"
 #include "primitives.hpp"
@@ -28,8 +17,34 @@ struct Position {
   int halfmove_clock      = 0;             // 50-move-rule counter
   int fullmove_number     = 1;             // current move number of the side to move
 
+  // all occupied squares
   constexpr Bitboard occupied() const { return occupancy[peel(Color::White)] | occupancy[peel(Color::Black)]; }
+
+  bool operator==(const Position&) const = default;
 };
+
+// places a piece on an empty square
+constexpr void put_piece(Position& pos, Piece p, Square sq) {
+  assert(p != Piece::None && pos.board[peel(sq)] == Piece::None);
+  pos.board[peel(sq)] = p;
+  pos.pieces[peel(color_of(p))][peel(type_of(p))] |= square_bb(sq);
+  pos.occupancy[peel(color_of(p))] |= square_bb(sq);
+}
+
+// takes a piece off an occupied square
+constexpr void remove_piece(Position& pos, Square sq) {
+  const Piece p = pos.board[peel(sq)];
+  assert(p != Piece::None);
+  pos.board[peel(sq)] = Piece::None;
+  pos.pieces[peel(color_of(p))][peel(type_of(p))] &= ~square_bb(sq);
+  pos.occupancy[peel(color_of(p))] &= ~square_bb(sq);
+}
+
+/*
+ * true if the position is legal chess and its board[] / bitboards agree with each other
+ * TODO: side not to move must not be in check (needs attack table)
+ */
+bool is_valid(const Position& pos);
 
 }  // namespace chess
 

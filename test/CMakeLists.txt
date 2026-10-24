@@ -13,6 +13,7 @@ add_executable(unit_tests
     test_bitboard.cpp
     test_primitives.cpp
     test_debug.cpp
+    test_fen.cpp
 )
 
 target_link_libraries(unit_tests PRIVATE chess_core GTest::gtest_main)

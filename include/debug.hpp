@@ -10,10 +10,10 @@
 
 namespace chess {
 
-std::string to_string(Square sq);              // "e4", "-" for Square::None
-std::string to_string(CastlingRights rights);  // "KQkq" subset, "-" for none
-std::string to_string(Bitboard bb);            // 1/. grid, rank 8 on top, plus hex value
-std::string to_string(const Position& pos);    // piece grid (FEN letters) plus state line
+std::string to_string(Square sq);              // e.g. "e4", or "-" for Square::None
+std::string to_string(CastlingRights rights);  // e.g. "KQkq", or "-" for none
+std::string to_string(Bitboard bb);            // 8x8 grid of 1s and .s, plus the hex value
+std::string to_string(const Position& pos);    // 8x8 grid of pieces, plus side/castling/ep/move counters
 
 void print(Bitboard bb);
 void print(Bitboard bb, std::ostream& os);

@@ -96,19 +96,23 @@ constexpr CastlingRights operator~(CastlingRights a) { return CastlingRights(~pe
 constexpr CastlingRights& operator|=(CastlingRights& a, CastlingRights b) { return a = a | b; }
 constexpr CastlingRights& operator&=(CastlingRights& a, CastlingRights b) { return a = a & b; }
 
+// true if at least one castling right is set
 constexpr bool any(CastlingRights rights) { return rights != CastlingRights::None; }
 
-constexpr int file_of(Square sq) { return peel(sq) & 7; }   // 0 = A file
-constexpr int rank_of(Square sq) { return peel(sq) >> 3; }  // 0 = 1st rank
+// column (0 = a file ... 7 = h file) and row (0 = rank 1 ... 7 = rank 8) of a square
+constexpr int file_of(Square sq) { return peel(sq) & 7; }
+constexpr int rank_of(Square sq) { return peel(sq) >> 3; }
 
+// square from a 0-7 file and 0-7 rank, e.g. make_square(4, 3) == E4
 constexpr Square make_square(int file, int rank) {
   assert(file >= 0 && file < 8 && rank >= 0 && rank < 8);
   return Square((rank * 8) + file);
 }
 
+// combines a color and a type into a piece, e.g. (Black, Knight) -> BN
 constexpr Piece make_piece(Color c, PieceType pt) { return Piece(1 + (peel(c) * TYPES) + peel(pt)); }
 
-// precondition for both: p != Piece::None
+// splits a piece back into its type and color
 constexpr PieceType type_of(Piece p) {
   assert(p != Piece::None);
   return PieceType((peel(p) - 1) % TYPES);
@@ -118,7 +122,19 @@ constexpr Color color_of(Piece p) {
   return Color((peel(p) - 1) / TYPES);
 }
 
+// the other color
 constexpr Color operator~(Color c) { return Color(peel(c) ^ 1); }
+
+// returns FEN character; '.' for empty
+constexpr char piece_char(Piece p) { return ".PNBRQKpnbrqk"[peel(p)]; }
+
+// piece for a FEN letter, or Piece::None if it isn't one
+constexpr Piece piece_from_char(char c) {
+  for (uint8_t i = 1; i <= COLORS * TYPES; ++i) {
+    if (piece_char(Piece(i)) == c) return Piece(i);
+  }
+  return Piece::None;
+}
 
 }  // namespace chess
 

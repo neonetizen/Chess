@@ -51,12 +51,13 @@ constexpr Bitboard BB_RANK_6 = BB_RANK_1 << (8 * 5);
 constexpr Bitboard BB_RANK_7 = BB_RANK_1 << (8 * 6);
 constexpr Bitboard BB_RANK_8 = BB_RANK_1 << (8 * 7);
 
-// precondition: sq != Square::None (shifting a 64-bit value by 64 is UB, [expr.shift]/1)
+// bitboard with single square
 constexpr Bitboard square_bb(Square sq) {
   assert(sq != Square::None);
   return Bitboard{1} << peel(sq);
 }
 
+// add a square to a bitboard / test whether a square is in it, e.g. bb | Square::E4, bb & Square::E4
 constexpr Bitboard operator|(Bitboard bb, Square sq) { return bb | square_bb(sq); }
 constexpr Bitboard operator&(Bitboard bb, Square sq) { return bb & square_bb(sq); }
 
@@ -78,15 +79,19 @@ constexpr Bitboard shift(Bitboard bb, Direction dir) {
   return BB_NONE;
 }
 
+// number of set squares
 constexpr int popcount(Bitboard bb) { return std::popcount(bb); }
 
-// precondition: bb != BB_NONE
+// lowest set square (closest to A1)
 constexpr Square lsb(Bitboard bb) {
   assert(bb != BB_NONE);
   return Square(std::countr_zero(bb));
 }
 
-// returns the lowest set square and clears it from bb; precondition: bb != BB_NONE
+/*
+ * removes the lowest set square from bb and returns it;
+ *   while (bb) { Square sq = pop_lsb(bb); ... }
+ */
 constexpr Square pop_lsb(Bitboard& bb) {
   const Square sq = lsb(bb);
   bb &= bb - 1;

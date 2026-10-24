@@ -14,9 +14,22 @@ option(CHESS_NATIVE   "-march=native" ON)
 option(CHESS_LTO      "LTO in release" ON)
 option(CHESS_SANITIZE "asan + ubsan" OFF)
 
+set(CHESS_LOG_LEVEL "" CACHE STRING "trace, debug, info, warn, error, critical or off")
+if(NOT CHESS_LOG_LEVEL)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CHESS_LOG_LEVEL trace)
+    else()
+        set(CHESS_LOG_LEVEL info)
+    endif()
+endif()
+string(TOUPPER ${CHESS_LOG_LEVEL} log_level)
+
 add_library(chess_options INTERFACE)
 target_compile_options(chess_options INTERFACE -Wall -Wconversion -Wshadow -Wimplicit-fallthrough)
-target_compile_definitions(chess_options INTERFACE $<$<CONFIG:Debug>:_GLIBCXX_ASSERTIONS>)
+target_compile_definitions(chess_options INTERFACE
+    $<$<CONFIG:Debug>:_GLIBCXX_ASSERTIONS>
+    SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${log_level}
+)
 if(CHESS_NATIVE)
     target_compile_options(chess_options INTERFACE -march=native)
 endif()
@@ -29,6 +42,7 @@ if(CHESS_LTO)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 endif()
 
+add_subdirectory(external/spdlog)
 add_subdirectory(src)
 
 enable_testing()
