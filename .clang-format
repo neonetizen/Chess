@@ -1,0 +1,18 @@
+BasedOnStyle: Google
+Standard: c++20
+ColumnLimit: 120
+IndentWidth: 2
+IncludeBlocks: Regroup
+IncludeIsMainRegex: "a^"
+IncludeCategories:
+  - Regex: "^<[a-z_]+>$"
+    Priority: 1
+  - Regex: "^<.*>$"
+    Priority: 2
+  - Regex: '^".*"$'
+    Priority: 3
+AllowShortCaseLabelsOnASingleLine: true
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+AlignConsecutiveAssignments:
+  Enabled: true

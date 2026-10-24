@@ -1,0 +1,25 @@
+Checks: >
+  bugprone-*,
+  performance-*,
+  modernize-*,
+  readability-*,
+  clang-analyzer-*,
+  -modernize-use-trailing-return-type,
+  -readability-magic-numbers,
+  -readability-identifier-length,
+  -modernize-avoid-c-arrays,
+  -modernize-use-nodiscard,
+  -modernize-use-designated-initializers,
+  -readability-math-missing-parentheses,
+  -readability-implicit-bool-conversion,
+  -bugprone-easily-swappable-parameters,
+  -clang-analyzer-optin.core.EnumCastOutOfRange,
+  -modernize-use-integer-sign-comparison
+
+CheckOptions:
+  readability-braces-around-statements.ShortStatementLines: 1
+  readability-function-cognitive-complexity.IgnoreMacros: true
+  readability-function-cognitive-complexity.Threshold: 40
+
+HeaderFilterRegex: '/(include|src|test)/'
+FormatStyle: file
