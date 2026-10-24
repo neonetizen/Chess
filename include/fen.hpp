@@ -6,4 +6,4 @@
 #ifndef FEN_HPP
 #define FEN_HPP
 
-#endif // FEN_HPP
+#endif  // FEN_HPP

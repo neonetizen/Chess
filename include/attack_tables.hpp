@@ -7,4 +7,4 @@
 #ifndef ATTACK_TABLES_HPP
 #define ATTACK_TABLES_HPP
 
-#endif // ATTACK_TABLES_HPP
+#endif  // ATTACK_TABLES_HPP

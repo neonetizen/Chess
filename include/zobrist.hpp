@@ -4,4 +4,4 @@
 #ifndef ZOBRIST_HPP
 #define ZOBRIST_HPP
 
-#endif // ZOBRIST_HPP
+#endif  // ZOBRIST_HPP

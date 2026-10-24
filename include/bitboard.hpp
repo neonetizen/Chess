@@ -30,8 +30,8 @@ namespace chess {
  */
 using Bitboard = std::uint64_t;
 
-constexpr Bitboard BB_ALL  = ~Bitboard{0}; // universal set
-constexpr Bitboard BB_NONE = 0;            // empty set
+constexpr Bitboard BB_ALL  = ~Bitboard{0};  // universal set
+constexpr Bitboard BB_NONE = 0;             // empty set
 
 constexpr Bitboard BB_FILE_A = 0x0101010101010101ULL;
 constexpr Bitboard BB_FILE_B = BB_FILE_A << 1;
@@ -53,8 +53,8 @@ constexpr Bitboard BB_RANK_8 = BB_RANK_1 << (8 * 7);
 
 // precondition: sq != Square::None (shifting a 64-bit value by 64 is UB, [expr.shift]/1)
 constexpr Bitboard square_bb(Square sq) {
-    assert(sq != Square::None);
-    return Bitboard{1} << peel(sq);
+  assert(sq != Square::None);
+  return Bitboard{1} << peel(sq);
 }
 
 constexpr Bitboard operator|(Bitboard bb, Square sq) { return bb | square_bb(sq); }
@@ -65,34 +65,34 @@ constexpr Bitboard operator&(Bitboard bb, Square sq) { return bb & square_bb(sq)
  * (wrapping from the H file to the A file and back)
  */
 constexpr Bitboard shift(Bitboard bb, Direction dir) {
-    switch (dir) {
-        case Direction::North:     return bb << 8;
-        case Direction::South:     return bb >> 8;
-        case Direction::East:      return (bb & ~BB_FILE_H) << 1;
-        case Direction::West:      return (bb & ~BB_FILE_A) >> 1;
-        case Direction::NorthEast: return (bb & ~BB_FILE_H) << 9;
-        case Direction::NorthWest: return (bb & ~BB_FILE_A) << 7;
-        case Direction::SouthEast: return (bb & ~BB_FILE_H) >> 7;
-        case Direction::SouthWest: return (bb & ~BB_FILE_A) >> 9;
-    }
-    return BB_NONE;
+  switch (dir) {
+    case Direction::North:     return bb << 8;
+    case Direction::South:     return bb >> 8;
+    case Direction::East:      return (bb & ~BB_FILE_H) << 1;
+    case Direction::West:      return (bb & ~BB_FILE_A) >> 1;
+    case Direction::NorthEast: return (bb & ~BB_FILE_H) << 9;
+    case Direction::NorthWest: return (bb & ~BB_FILE_A) << 7;
+    case Direction::SouthEast: return (bb & ~BB_FILE_H) >> 7;
+    case Direction::SouthWest: return (bb & ~BB_FILE_A) >> 9;
+  }
+  return BB_NONE;
 }
 
 constexpr int popcount(Bitboard bb) { return std::popcount(bb); }
 
 // precondition: bb != BB_NONE
 constexpr Square lsb(Bitboard bb) {
-    assert(bb != BB_NONE);
-    return Square(std::countr_zero(bb));
+  assert(bb != BB_NONE);
+  return Square(std::countr_zero(bb));
 }
 
 // returns the lowest set square and clears it from bb; precondition: bb != BB_NONE
 constexpr Square pop_lsb(Bitboard& bb) {
-    const Square sq = lsb(bb);
-    bb &= bb - 1;
-    return sq;
+  const Square sq = lsb(bb);
+  bb &= bb - 1;
+  return sq;
 }
 
-} // namespace chess
+}  // namespace chess
 
-#endif // BITBOARD_HPP
+#endif  // BITBOARD_HPP
