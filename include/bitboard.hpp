@@ -1,7 +1,3 @@
-/*
- * TODO:
- *   - add to_string for debug printing?
- */
 #ifndef BITBOARD_HPP
 #define BITBOARD_HPP
 
@@ -56,6 +52,9 @@ constexpr Bitboard square_bb(Square sq) {
   assert(sq != Square::None);
   return Bitboard{1} << peel(sq);
 }
+
+constexpr Bitboard rank_bb(Square sq) { return BB_RANK_1 << (8 * rank_of(sq)); }
+constexpr Bitboard file_bb(Square sq) { return BB_FILE_A << file_of(sq); }
 
 // add a square to a bitboard / test whether a square is in it, e.g. bb | Square::E4, bb & Square::E4
 constexpr Bitboard operator|(Bitboard bb, Square sq) { return bb | square_bb(sq); }

@@ -61,3 +61,20 @@ TEST(Position, DefaultIsEmptyBoard) {
   EXPECT_EQ(pos.ep_square, Square::None);
   EXPECT_EQ(pos.fullmove_number, 1);
 }
+
+TEST(Piece, FromChar) {
+  EXPECT_EQ(piece_from_char('P'), Piece::WP);
+  EXPECT_EQ(piece_from_char('k'), Piece::BK);
+  for (const char c : {'x', 'X', '.', ' ', '0', '1', '/', '-', '\0'}) {
+    EXPECT_EQ(piece_from_char(c), Piece::None) << "'" << c << "'";
+  }
+}
+
+#ifndef NDEBUG
+TEST(PrimitivesDeathTest, AssertsOnOutOfRange) {
+  EXPECT_DEATH(make_square(8, 0), "");
+  EXPECT_DEATH(make_square(0, -1), "");
+  EXPECT_DEATH(type_of(Piece::None), "");
+  EXPECT_DEATH(color_of(Piece::None), "");
+}
+#endif

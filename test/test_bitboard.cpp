@@ -26,6 +26,14 @@ TEST(Masks, FilesAndRanks) {
   EXPECT_EQ(BB_FILE_D & BB_RANK_4, square_bb(Square::D4));
 }
 
+TEST(Masks, RankAndFileOfSquare) {
+  EXPECT_EQ(rank_bb(Square::A1), BB_RANK_1);
+  EXPECT_EQ(rank_bb(Square::H8), BB_RANK_8);
+  EXPECT_EQ(file_bb(Square::E4), BB_FILE_E);
+  EXPECT_EQ(file_bb(Square::H1), BB_FILE_H);
+  EXPECT_EQ(rank_bb(Square::C5) & file_bb(Square::C5), square_bb(Square::C5));
+}
+
 TEST(Shift, ShiftsToCorrectSquare) {
   EXPECT_EQ(shift(square_bb(Square::A1), Direction::North), square_bb(Square::A2));
   EXPECT_EQ(shift(square_bb(Square::A2), Direction::NorthEast), square_bb(Square::B3));
@@ -63,6 +71,15 @@ TEST(Lsb, PopsSquaresLowToHigh) {
   EXPECT_EQ(pop_lsb(bb), Square::H8);
   EXPECT_EQ(bb, BB_NONE);
 }
+
+#ifndef NDEBUG
+TEST(BitboardDeathTest, AssertsOnNoSquare) {
+  EXPECT_DEATH(square_bb(Square::None), "");
+  EXPECT_DEATH(lsb(BB_NONE), "");
+  Bitboard empty = BB_NONE;
+  EXPECT_DEATH(pop_lsb(empty), "");
+}
+#endif
 
 static_assert(shift(square_bb(Square::E4), Direction::North) == square_bb(Square::E5));
 static_assert(lsb(BB_FILE_B) == Square::B1);

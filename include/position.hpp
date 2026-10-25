@@ -40,10 +40,10 @@ constexpr void remove_piece(Position& pos, Square sq) {
   pos.occupancy[peel(color_of(p))] &= ~square_bb(sq);
 }
 
-/*
- * true if the position is legal chess and its board[] / bitboards agree with each other
- * TODO: side not to move must not be in check (needs attack table)
- */
+// true if any piece of color by attacks sq
+bool is_attacked(const Position& pos, Square sq, Color by);
+
+// true if the position is legal chess and its board[]/bitboards agree
 bool is_valid(const Position& pos);
 
 }  // namespace chess

@@ -50,6 +50,14 @@ TEST(Fen, CountersDefaultWhenMissing) {
   EXPECT_EQ(pos->fullmove_number, 1);
 }
 
+TEST(Fen, AcceptsAdjacentDigits) {
+  const auto split  = from_fen("4k3/44/8/8/8/8/71/4K3 w - - 0 1");
+  const auto normal = from_fen("4k3/8/8/8/8/8/8/4K3 w - - 0 1");
+  ASSERT_TRUE(split);
+  ASSERT_TRUE(normal);
+  EXPECT_EQ(*split, *normal);
+}
+
 TEST(Fen, RejectsMalformed) {
   constexpr std::string_view bad[] = {
       "",
@@ -66,39 +74,25 @@ TEST(Fen, RejectsMalformed) {
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 one",
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 extra",
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w",
+      "rnbqkbnr/pppppppp/08/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "rnbqkbnr/pppppppp//8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/ w KQkq - 0 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBN w KQkq - 0 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR W KQkq - 0 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR white KQkq - 0 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w -K - 0 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w -- - 0 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e 0 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq E3 0 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e33 0 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq i3 0 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - +1 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 1.5 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0x1 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 99999999999999999999 1",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR\tw KQkq - 0 1",
   };
   for (const auto fen : bad) {
     EXPECT_FALSE(from_fen(fen)) << fen;
   }
-}
-
-TEST(IsValid, RejectsIllegalPositions) {
-  constexpr std::string_view illegal[] = {
-      "8/8/8/8/8/8/8/4K3 w - - 0 1",   "4k3/8/8/8/8/8/8/3KK3 w - - 0 1",    "4k2P/8/8/8/8/8/8/4K3 w - - 0 1",
-      "4k3/8/8/8/8/8/8/4K3 w K - 0 1", "4k3/8/8/8/3pP3/8/8/4K3 w - e3 0 1", "4k3/8/8/8/8/8/8/4K3 b - e3 0 1",
-      "4k3/8/8/8/8/8/8/4K3 w - - 0 0",
-  };
-  for (const auto fen : illegal) {
-    const auto pos = from_fen(fen);
-    ASSERT_TRUE(pos) << fen;
-    EXPECT_FALSE(is_valid(*pos)) << fen;
-  }
-}
-
-TEST(IsValid, CatchesBoardBitboardMismatch) {
-  auto pos = from_fen(STARTPOS_FEN);
-  ASSERT_TRUE(pos);
-  pos->pieces[peel(Color::White)][peel(PieceType::Knight)] |= square_bb(Square::E4);
-  EXPECT_FALSE(is_valid(*pos));
-}
-
-TEST(PutRemove, KeepBoardAndBitboardsInSync) {
-  Position pos;
-  put_piece(pos, Piece::BN, Square::C6);
-  EXPECT_EQ(pos.board[peel(Square::C6)], Piece::BN);
-  EXPECT_EQ(pos.pieces[peel(Color::Black)][peel(PieceType::Knight)], square_bb(Square::C6));
-  EXPECT_EQ(pos.occupancy[peel(Color::Black)], square_bb(Square::C6));
-
-  remove_piece(pos, Square::C6);
-  EXPECT_EQ(pos, Position{});
 }

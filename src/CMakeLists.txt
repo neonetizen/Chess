@@ -1,4 +1,5 @@
 add_library(chess_core STATIC
+    attacks.cpp
     position.cpp
     fen.cpp
     debug.cpp

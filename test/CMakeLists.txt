@@ -10,13 +10,16 @@ set(INSTALL_GTEST OFF)
 FetchContent_makeAvailable(googletest)
 
 add_executable(unit_tests
+    main.cpp
     test_bitboard.cpp
     test_primitives.cpp
     test_debug.cpp
     test_fen.cpp
+    test_attacks.cpp
+    test_position.cpp
 )
 
-target_link_libraries(unit_tests PRIVATE chess_core GTest::gtest_main)
+target_link_libraries(unit_tests PRIVATE chess_core GTest::gtest)
 
 include(GoogleTest)
 gtest_discover_tests(unit_tests)

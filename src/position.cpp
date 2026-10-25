@@ -1,3 +1,4 @@
+#include "attacks.hpp"
 #include "debug.hpp"
 #include "log.hpp"
 #include "position.hpp"
@@ -36,6 +37,18 @@ bool bitboards_match_board(const Position& pos) {
 }
 
 }  // namespace
+
+bool is_attacked(const Position& pos, Square sq, Color by) {
+  const auto& p           = pos.pieces[peel(by)];
+  const Bitboard occupied = pos.occupied();
+  const Bitboard queens   = p[peel(PieceType::Queen)];
+  // symmetric attacks
+  return (pawn_attacks(~by, sq) & p[peel(PieceType::Pawn)]) != BB_NONE ||
+         (knight_attacks(sq) & p[peel(PieceType::Knight)]) != BB_NONE ||
+         (king_attacks(sq) & p[peel(PieceType::King)]) != BB_NONE ||
+         (bishop_attacks(sq, occupied) & (p[peel(PieceType::Bishop)] | queens)) != BB_NONE ||
+         (rook_attacks(sq, occupied) & (p[peel(PieceType::Rook)] | queens)) != BB_NONE;
+}
 
 bool is_valid(const Position& pos) {
   CHESS_TRACE_FUNC();
@@ -80,6 +93,13 @@ bool is_valid(const Position& pos) {
       CHESS_ERROR("invalid position: en passant square {} doesn't follow a double pawn push", to_string(pos.ep_square));
       return false;
     }
+  }
+
+  const Color waiting = ~pos.side_to_move;
+  if (is_attacked(pos, lsb(pos.pieces[peel(waiting)][peel(PieceType::King)]), pos.side_to_move)) {
+    CHESS_ERROR("invalid position: {} is in check but it's {}'s move", waiting == Color::White ? "white" : "black",
+                waiting == Color::White ? "black" : "white");
+    return false;
   }
 
   if (pos.halfmove_clock < 0 || pos.fullmove_number < 1) {

@@ -12,6 +12,7 @@ endif()
 
 option(CHESS_NATIVE   "-march=native" ON)
 option(CHESS_LTO      "LTO in release" ON)
+option(CHESS_PEXT     "pext slider lookups" OFF)
 option(CHESS_SANITIZE "asan + ubsan" OFF)
 
 set(CHESS_LOG_LEVEL "" CACHE STRING "trace, debug, info, warn, error, critical or off")
@@ -32,6 +33,10 @@ target_compile_definitions(chess_options INTERFACE
 )
 if(CHESS_NATIVE)
     target_compile_options(chess_options INTERFACE -march=native)
+endif()
+if(CHESS_PEXT)
+    target_compile_options(chess_options INTERFACE -mbmi2)
+    target_compile_definitions(chess_options INTERFACE CHESS_PEXT)
 endif()
 if(CHESS_SANITIZE)
     target_compile_options(chess_options INTERFACE -fsanitize=address,undefined -fno-omit-frame-pointer)

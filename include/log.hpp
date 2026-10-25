@@ -23,7 +23,7 @@ spdlog::logger* logger();
 #define CHESS_ERROR(...) CHESS_LOG_AT(SPDLOG_LOGGER_ERROR, __VA_ARGS__)
 #define CHESS_CRITICAL(...) CHESS_LOG_AT(SPDLOG_LOGGER_CRITICAL, __VA_ARGS__)
 
-// log entry of afunction
+// used log entry of a function
 #define CHESS_TRACE_FUNC() CHESS_TRACE("enter")
 
 #endif  // LOG_HPP
