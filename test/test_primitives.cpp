@@ -20,8 +20,8 @@ TEST(Piece, MakeAndDecompose) {
   EXPECT_EQ(make_piece(Color::Black, PieceType::Pawn), Piece::BP);
   EXPECT_EQ(make_piece(Color::Black, PieceType::King), Piece::BK);
 
-  for (int c = 0; c < COLORS; ++c) {
-    for (int t = 0; t < TYPES; ++t) {
+  for (int c = 0; c < kColors; ++c) {
+    for (int t = 0; t < kTypes; ++t) {
       const Piece p = make_piece(Color(c), PieceType(t));
       EXPECT_EQ(color_of(p), Color(c));
       EXPECT_EQ(type_of(p), PieceType(t));
@@ -54,12 +54,12 @@ TEST(Castling, ComplementStaysInFourBits) {
 
 TEST(Position, DefaultIsEmptyBoard) {
   const Position pos;
-  EXPECT_EQ(pos.occupied(), BB_NONE);
-  EXPECT_EQ(pos.board[peel(Square::E1)], Piece::None);
-  EXPECT_EQ(pos.side_to_move, Color::White);
-  EXPECT_EQ(pos.castling, CastlingRights::None);
-  EXPECT_EQ(pos.ep_square, Square::None);
-  EXPECT_EQ(pos.fullmove_number, 1);
+  EXPECT_EQ(pos.occupied(), kBbNone);
+  EXPECT_EQ(pos.piece_on(Square::E1), Piece::None);
+  EXPECT_EQ(pos.side_to_move(), Color::White);
+  EXPECT_EQ(pos.castling(), CastlingRights::None);
+  EXPECT_EQ(pos.ep_square(), Square::None);
+  EXPECT_EQ(pos.fullmove_number(), 1);
 }
 
 TEST(Piece, FromChar) {

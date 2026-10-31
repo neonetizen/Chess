@@ -14,7 +14,7 @@
 namespace chess {
 namespace detail {
 
-using AttackTable = std::array<Bitboard, SQUARES>;
+using AttackTable = std::array<Bitboard, kSquares>;
 
 // a knight jump is one straight step plus one diagonal step away from it, so shift() handles the edge wrapping
 constexpr Bitboard knight_jumps(Bitboard bb) {
@@ -33,24 +33,24 @@ constexpr Bitboard king_steps(Bitboard bb) {
 template <typename F>
 constexpr AttackTable make_table(F step) {
   AttackTable table{};
-  for (std::size_t sq = 0; sq < SQUARES; ++sq) table[sq] = step(square_bb(Square(sq)));
+  for (std::size_t sq = 0; sq < kSquares; ++sq) table[sq] = step(square_bb(Square(sq)));
   return table;
 }
 
-inline constexpr AttackTable KNIGHT_ATTACKS                   = make_table(knight_jumps);
-inline constexpr AttackTable KING_ATTACKS                     = make_table(king_steps);
-inline constexpr std::array<AttackTable, COLORS> PAWN_ATTACKS = {
+inline constexpr AttackTable kKnightAttacks                    = make_table(knight_jumps);
+inline constexpr AttackTable kKingAttacks                      = make_table(king_steps);
+inline constexpr std::array<AttackTable, kColors> kPawnAttacks = {
     make_table([](Bitboard bb) { return shift(bb, Direction::NorthEast) | shift(bb, Direction::NorthWest); }),
     make_table([](Bitboard bb) { return shift(bb, Direction::SouthEast) | shift(bb, Direction::SouthWest); }),
 };
 
 // squares reached walking from sq in dir, stopping at (and including) the first occupied square
 constexpr Bitboard slide(Square sq, Bitboard occupied, Direction dir) {
-  Bitboard attacks = BB_NONE;
+  Bitboard attacks = kBbNone;
   Bitboard bb      = square_bb(sq);
-  while ((bb = shift(bb, dir)) != BB_NONE) {
+  while ((bb = shift(bb, dir)) != kBbNone) {
     attacks |= bb;
-    if ((bb & occupied) != BB_NONE) break;
+    if ((bb & occupied) != kBbNone) break;
   }
   return attacks;
 }
@@ -74,7 +74,7 @@ constexpr Bitboard rook_attacks_slow(Square sq, Bitboard occupied) {
  * reference chess programming wiki if needed
  */
 struct Magic {
-  Bitboard mask         = BB_NONE;
+  Bitboard mask         = kBbNone;
   Bitboard magic        = 0;
   const Bitboard* table = nullptr;
   unsigned shift        = 0;
@@ -88,8 +88,8 @@ struct Magic {
   }
 };
 
-inline Magic BISHOP_MAGICS[SQUARES];
-inline Magic ROOK_MAGICS[SQUARES];
+inline Magic bishop_magics[kSquares];
+inline Magic rook_magics[kSquares];
 
 }  // namespace detail
 
@@ -99,31 +99,31 @@ void init_attacks();
 // squares a knight on sq attacks
 constexpr Bitboard knight_attacks(Square sq) {
   assert(sq != Square::None);
-  return detail::KNIGHT_ATTACKS[peel(sq)];
+  return detail::kKnightAttacks[peel(sq)];
 }
 
 // squares a king on sq attacks
 constexpr Bitboard king_attacks(Square sq) {
   assert(sq != Square::None);
-  return detail::KING_ATTACKS[peel(sq)];
+  return detail::kKingAttacks[peel(sq)];
 }
 
 // squares a pawn of color c on sq attacks (its two forward diagonals)
 constexpr Bitboard pawn_attacks(Color c, Square sq) {
   assert(sq != Square::None);
-  return detail::PAWN_ATTACKS[peel(c)][peel(sq)];
+  return detail::kPawnAttacks[peel(c)][peel(sq)];
 }
 
 // squares a bishop / rook / queen on sq attacks, given every occupied square on the board
 inline Bitboard bishop_attacks(Square sq, Bitboard occupied) {
   assert(sq != Square::None);
-  const detail::Magic& m = detail::BISHOP_MAGICS[peel(sq)];
+  const detail::Magic& m = detail::bishop_magics[peel(sq)];
   assert(m.table != nullptr);  // init_attacks() not called
   return m.table[m.index(occupied)];
 }
 inline Bitboard rook_attacks(Square sq, Bitboard occupied) {
   assert(sq != Square::None);
-  const detail::Magic& m = detail::ROOK_MAGICS[peel(sq)];
+  const detail::Magic& m = detail::rook_magics[peel(sq)];
   assert(m.table != nullptr);  // init_attacks() not called
   return m.table[m.index(occupied)];
 }

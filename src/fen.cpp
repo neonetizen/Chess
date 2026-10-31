@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <array>
 #include <charconv>
+#include <cstdint>
+#include <limits>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -14,10 +16,10 @@
 namespace chess {
 namespace {
 
-constexpr size_t MAX_FIELDS = 6;
+constexpr size_t kMaxFields = 6;
 
 struct Fields {
-  std::array<std::string_view, MAX_FIELDS> field{};
+  std::array<std::string_view, kMaxFields> field{};
   size_t count = 0;
 };
 
@@ -29,8 +31,8 @@ std::optional<Fields> split_fields(std::string_view fen) {
       ++i;
       continue;
     }
-    if (out.count == MAX_FIELDS) {
-      CHESS_ERROR("bad fen '{}': more than {} fields", fen, MAX_FIELDS);
+    if (out.count == kMaxFields) {
+      CHESS_ERROR("bad fen '{}': more than {} fields", fen, kMaxFields);
       return std::nullopt;
     }
     const size_t end       = std::min(fen.find(' ', i), fen.size());
@@ -78,7 +80,7 @@ bool parse_placement(std::string_view fen, std::string_view placement, Position&
       CHESS_ERROR("bad fen '{}': rank {} has more than 8 squares", fen, rank + 1);
       return false;
     }
-    if (!is_digit) put_piece(pos, p, make_square(file, rank));
+    if (!is_digit) pos.put_piece(p, make_square(file, rank));
     file += width;
   }
   if (rank != 0 || file != 8) {
@@ -116,17 +118,17 @@ std::optional<Square> parse_square(std::string_view s) {
   return make_square(s[0] - 'a', s[1] - '1');
 }
 
-std::optional<int> parse_count(std::string_view s) {
+std::optional<int> parse_count(std::string_view s, int max) {
   CHESS_TRACE_FUNC();
   int value            = 0;
   const auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), value);
-  if (ec != std::errc{} || ptr != s.data() + s.size() || value < 0) return std::nullopt;
+  if (ec != std::errc{} || ptr != s.data() + s.size() || value < 0 || value > max) return std::nullopt;
   return value;
 }
 
 }  // namespace
 
-std::optional<Position> from_fen(std::string_view fen) {
+std::optional<Position> Position::from_fen(std::string_view fen) {
   CHESS_TRACE_FUNC();
   const auto fields = split_fields(fen);
   if (!fields) return std::nullopt;
@@ -139,11 +141,11 @@ std::optional<Position> from_fen(std::string_view fen) {
     CHESS_ERROR("bad fen '{}': side to move must be 'w' or 'b', got '{}'", fen, f[1]);
     return std::nullopt;
   }
-  pos.side_to_move = f[1] == "w" ? Color::White : Color::Black;
+  pos.side_to_move_ = f[1] == "w" ? Color::White : Color::Black;
 
   const auto castling = parse_castling(fen, f[2]);
   if (!castling) return std::nullopt;
-  pos.castling = *castling;
+  pos.castling_ = *castling;
 
   if (f[3] != "-") {
     const auto ep = parse_square(f[3]);
@@ -151,21 +153,23 @@ std::optional<Position> from_fen(std::string_view fen) {
       CHESS_ERROR("bad fen '{}': en passant square must be '-' or a square, got '{}'", fen, f[3]);
       return std::nullopt;
     }
-    pos.ep_square = *ep;
+    pos.ep_square_ = *ep;
   }
 
-  const auto halfmove = fields->count > 4 ? parse_count(f[4]) : 0;
+  constexpr int kMaxHalfmove = std::numeric_limits<decltype(pos.halfmove_clock_)>::max();
+  constexpr int kMaxFullmove = std::numeric_limits<decltype(pos.fullmove_number_)>::max();
+  const auto halfmove        = fields->count > 4 ? parse_count(f[4], kMaxHalfmove) : 0;
   if (!halfmove) {
-    CHESS_ERROR("bad fen '{}': halfmove clock must be a non-negative number, got '{}'", fen, f[4]);
+    CHESS_ERROR("bad fen '{}': halfmove clock must be a number from 0 to {}, got '{}'", fen, kMaxHalfmove, f[4]);
     return std::nullopt;
   }
-  const auto fullmove = fields->count > 5 ? parse_count(f[5]) : 1;
+  const auto fullmove = fields->count > 5 ? parse_count(f[5], kMaxFullmove) : 1;
   if (!fullmove) {
-    CHESS_ERROR("bad fen '{}': fullmove number must be a non-negative number, got '{}'", fen, f[5]);
+    CHESS_ERROR("bad fen '{}': fullmove number must be a number from 0 to {}, got '{}'", fen, kMaxFullmove, f[5]);
     return std::nullopt;
   }
-  pos.halfmove_clock  = *halfmove;
-  pos.fullmove_number = *fullmove;
+  pos.halfmove_clock_  = static_cast<uint8_t>(*halfmove);
+  pos.fullmove_number_ = static_cast<uint16_t>(*fullmove);
 
   return pos;
 }
@@ -176,7 +180,7 @@ std::string to_fen(const Position& pos) {
   for (int rank = 7; rank >= 0; --rank) {
     int empty = 0;
     for (int file = 0; file < 8; ++file) {
-      const Piece p = pos.board[peel(make_square(file, rank))];
+      const Piece p = pos.piece_on(make_square(file, rank));
       if (p == Piece::None) {
         ++empty;
         continue;
@@ -189,8 +193,9 @@ std::string to_fen(const Position& pos) {
     if (rank > 0) placement += '/';
   }
 
-  return fmt::format("{} {} {} {} {} {}", placement, pos.side_to_move == Color::White ? 'w' : 'b',
-                     to_string(pos.castling), to_string(pos.ep_square), pos.halfmove_clock, pos.fullmove_number);
+  return fmt::format("{} {} {} {} {} {}", placement, pos.side_to_move() == Color::White ? 'w' : 'b',
+                     to_string(pos.castling()), to_string(pos.ep_square()), pos.halfmove_clock(),
+                     pos.fullmove_number());
 }
 
 }  // namespace chess

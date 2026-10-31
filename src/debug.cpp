@@ -45,15 +45,15 @@ std::string to_string(CastlingRights rights) {
 
 std::string to_string(Bitboard bb) {
   CHESS_TRACE_FUNC();
-  return grid([bb](Square sq) { return (bb & sq) != BB_NONE ? '1' : '.'; }) + std::format("   0x{:016x}\n", bb);
+  return grid([bb](Square sq) { return (bb & sq) != kBbNone ? '1' : '.'; }) + std::format("   0x{:016x}\n", bb);
 }
 
 std::string to_string(const Position& pos) {
   CHESS_TRACE_FUNC();
-  return grid([&pos](Square sq) { return piece_char(pos.board[peel(sq)]); }) +
+  return grid([&pos](Square sq) { return piece_char(pos.piece_on(sq)); }) +
          std::format("\nside: {}  castling: {}  ep: {}  halfmove: {}  fullmove: {}\n",
-                     pos.side_to_move == Color::White ? 'w' : 'b', to_string(pos.castling), to_string(pos.ep_square),
-                     pos.halfmove_clock, pos.fullmove_number);
+                     pos.side_to_move() == Color::White ? 'w' : 'b', to_string(pos.castling()),
+                     to_string(pos.ep_square()), pos.halfmove_clock(), pos.fullmove_number());
 }
 
 void print(Bitboard bb) {

@@ -18,7 +18,7 @@ TEST(DebugString, CastlingRights) {
 }
 
 TEST(DebugString, Bitboard) {
-  EXPECT_EQ(to_string(BB_NONE | Square::A1 | Square::E4 | Square::H8),
+  EXPECT_EQ(to_string(kBbNone | Square::A1 | Square::E4 | Square::H8),
             "8  . . . . . . . 1\n"
             "7  . . . . . . . .\n"
             "6  . . . . . . . .\n"
@@ -33,18 +33,10 @@ TEST(DebugString, Bitboard) {
 }
 
 TEST(DebugString, Position) {
-  Position pos;
-  pos.board[peel(Square::E1)] = Piece::WK;
-  pos.board[peel(Square::D2)] = Piece::WP;
-  pos.board[peel(Square::E8)] = Piece::BK;
-  pos.board[peel(Square::A7)] = Piece::BQ;
-  pos.side_to_move            = Color::Black;
-  pos.castling                = CastlingRights::BlackOO;
-  pos.ep_square               = Square::D3;
-  pos.halfmove_clock          = 3;
-  pos.fullmove_number         = 12;
+  const auto pos = Position::from_fen("4k3/q7/8/8/8/8/3P4/4K3 b k d3 3 12");
+  ASSERT_TRUE(pos);
 
-  EXPECT_EQ(to_string(pos),
+  EXPECT_EQ(to_string(*pos),
             "8  . . . . k . . .\n"
             "7  q . . . . . . .\n"
             "6  . . . . . . . .\n"

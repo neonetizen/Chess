@@ -11,9 +11,9 @@
 
 namespace chess {
 
-inline constexpr uint8_t SQUARES = 64;
-inline constexpr uint8_t COLORS  = 2;
-inline constexpr uint8_t TYPES   = 6;
+inline constexpr uint8_t kSquares = 64;
+inline constexpr uint8_t kColors  = 2;
+inline constexpr uint8_t kTypes   = 6;
 
 // clang-format off
 enum struct Square : uint8_t {
@@ -110,16 +110,16 @@ constexpr Square make_square(int file, int rank) {
 }
 
 // combines a color and a type into a piece, e.g. (Black, Knight) -> BN
-constexpr Piece make_piece(Color c, PieceType pt) { return Piece(1 + (peel(c) * TYPES) + peel(pt)); }
+constexpr Piece make_piece(Color c, PieceType pt) { return Piece(1 + (peel(c) * kTypes) + peel(pt)); }
 
 // splits a piece back into its type and color
 constexpr PieceType type_of(Piece p) {
   assert(p != Piece::None);
-  return PieceType((peel(p) - 1) % TYPES);
+  return PieceType((peel(p) - 1) % kTypes);
 }
 constexpr Color color_of(Piece p) {
   assert(p != Piece::None);
-  return Color((peel(p) - 1) / TYPES);
+  return Color((peel(p) - 1) / kTypes);
 }
 
 // the other color
@@ -130,7 +130,7 @@ constexpr char piece_char(Piece p) { return ".PNBRQKpnbrqk"[peel(p)]; }
 
 // piece for a FEN letter, or Piece::None if it isn't one
 constexpr Piece piece_from_char(char c) {
-  for (uint8_t i = 1; i <= COLORS * TYPES; ++i) {
+  for (uint8_t i = 1; i <= kColors * kTypes; ++i) {
     if (piece_char(Piece(i)) == c) return Piece(i);
   }
   return Piece::None;

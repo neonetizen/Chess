@@ -26,26 +26,26 @@ namespace chess {
  */
 using Bitboard = std::uint64_t;
 
-constexpr Bitboard BB_ALL  = ~Bitboard{0};  // universal set
-constexpr Bitboard BB_NONE = 0;             // empty set
+constexpr Bitboard kBbAll  = ~Bitboard{0};  // universal set
+constexpr Bitboard kBbNone = 0;             // empty set
 
-constexpr Bitboard BB_FILE_A = 0x0101010101010101ULL;
-constexpr Bitboard BB_FILE_B = BB_FILE_A << 1;
-constexpr Bitboard BB_FILE_C = BB_FILE_A << 2;
-constexpr Bitboard BB_FILE_D = BB_FILE_A << 3;
-constexpr Bitboard BB_FILE_E = BB_FILE_A << 4;
-constexpr Bitboard BB_FILE_F = BB_FILE_A << 5;
-constexpr Bitboard BB_FILE_G = BB_FILE_A << 6;
-constexpr Bitboard BB_FILE_H = BB_FILE_A << 7;
+constexpr Bitboard kBbFileA = 0x0101010101010101ULL;
+constexpr Bitboard kBbFileB = kBbFileA << 1;
+constexpr Bitboard kBbFileC = kBbFileA << 2;
+constexpr Bitboard kBbFileD = kBbFileA << 3;
+constexpr Bitboard kBbFileE = kBbFileA << 4;
+constexpr Bitboard kBbFileF = kBbFileA << 5;
+constexpr Bitboard kBbFileG = kBbFileA << 6;
+constexpr Bitboard kBbFileH = kBbFileA << 7;
 
-constexpr Bitboard BB_RANK_1 = 0xFFULL;
-constexpr Bitboard BB_RANK_2 = BB_RANK_1 << (8 * 1);
-constexpr Bitboard BB_RANK_3 = BB_RANK_1 << (8 * 2);
-constexpr Bitboard BB_RANK_4 = BB_RANK_1 << (8 * 3);
-constexpr Bitboard BB_RANK_5 = BB_RANK_1 << (8 * 4);
-constexpr Bitboard BB_RANK_6 = BB_RANK_1 << (8 * 5);
-constexpr Bitboard BB_RANK_7 = BB_RANK_1 << (8 * 6);
-constexpr Bitboard BB_RANK_8 = BB_RANK_1 << (8 * 7);
+constexpr Bitboard kBbRank1 = 0xFFULL;
+constexpr Bitboard kBbRank2 = kBbRank1 << (8 * 1);
+constexpr Bitboard kBbRank3 = kBbRank1 << (8 * 2);
+constexpr Bitboard kBbRank4 = kBbRank1 << (8 * 3);
+constexpr Bitboard kBbRank5 = kBbRank1 << (8 * 4);
+constexpr Bitboard kBbRank6 = kBbRank1 << (8 * 5);
+constexpr Bitboard kBbRank7 = kBbRank1 << (8 * 6);
+constexpr Bitboard kBbRank8 = kBbRank1 << (8 * 7);
 
 // bitboard with single square
 constexpr Bitboard square_bb(Square sq) {
@@ -53,8 +53,8 @@ constexpr Bitboard square_bb(Square sq) {
   return Bitboard{1} << peel(sq);
 }
 
-constexpr Bitboard rank_bb(Square sq) { return BB_RANK_1 << (8 * rank_of(sq)); }
-constexpr Bitboard file_bb(Square sq) { return BB_FILE_A << file_of(sq); }
+constexpr Bitboard rank_bb(Square sq) { return kBbRank1 << (8 * rank_of(sq)); }
+constexpr Bitboard file_bb(Square sq) { return kBbFileA << file_of(sq); }
 
 // add a square to a bitboard / test whether a square is in it, e.g. bb | Square::E4, bb & Square::E4
 constexpr Bitboard operator|(Bitboard bb, Square sq) { return bb | square_bb(sq); }
@@ -68,14 +68,14 @@ constexpr Bitboard shift(Bitboard bb, Direction dir) {
   switch (dir) {
     case Direction::North:     return bb << 8;
     case Direction::South:     return bb >> 8;
-    case Direction::East:      return (bb & ~BB_FILE_H) << 1;
-    case Direction::West:      return (bb & ~BB_FILE_A) >> 1;
-    case Direction::NorthEast: return (bb & ~BB_FILE_H) << 9;
-    case Direction::NorthWest: return (bb & ~BB_FILE_A) << 7;
-    case Direction::SouthEast: return (bb & ~BB_FILE_H) >> 7;
-    case Direction::SouthWest: return (bb & ~BB_FILE_A) >> 9;
+    case Direction::East:      return (bb & ~kBbFileH) << 1;
+    case Direction::West:      return (bb & ~kBbFileA) >> 1;
+    case Direction::NorthEast: return (bb & ~kBbFileH) << 9;
+    case Direction::NorthWest: return (bb & ~kBbFileA) << 7;
+    case Direction::SouthEast: return (bb & ~kBbFileH) >> 7;
+    case Direction::SouthWest: return (bb & ~kBbFileA) >> 9;
   }
-  return BB_NONE;
+  return kBbNone;
 }
 
 // number of set squares
@@ -83,7 +83,7 @@ constexpr int popcount(Bitboard bb) { return std::popcount(bb); }
 
 // lowest set square (closest to A1)
 constexpr Square lsb(Bitboard bb) {
-  assert(bb != BB_NONE);
+  assert(bb != kBbNone);
   return Square(std::countr_zero(bb));
 }
 

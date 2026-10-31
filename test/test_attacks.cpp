@@ -12,7 +12,7 @@ using namespace chess;
 namespace {
 
 Bitboard squares(std::initializer_list<Square> list) {
-  Bitboard bb = BB_NONE;
+  Bitboard bb = kBbNone;
   for (Square sq : list) bb = bb | sq;
   return bb;
 }
@@ -42,8 +42,8 @@ TEST(PawnAttacks, DiagonalsByColor) {
   EXPECT_EQ(pawn_attacks(Color::Black, E4), squares({D3, F3}));
   EXPECT_EQ(pawn_attacks(Color::White, A2), squares({B3}));
   EXPECT_EQ(pawn_attacks(Color::Black, H7), squares({G6}));
-  EXPECT_EQ(pawn_attacks(Color::White, D8), BB_NONE);
-  EXPECT_EQ(pawn_attacks(Color::Black, D1), BB_NONE);
+  EXPECT_EQ(pawn_attacks(Color::White, D8), kBbNone);
+  EXPECT_EQ(pawn_attacks(Color::Black, D1), kBbNone);
 }
 
 /*
@@ -54,8 +54,8 @@ TEST(PawnAttacks, DiagonalsByColor) {
  * 3. compare with the table bit for that pair
  */
 TEST(Attacks, MatchBruteForceOnEverySquare) {
-  for (int from = 0; from < SQUARES; ++from) {
-    for (int to = 0; to < SQUARES; ++to) {
+  for (int from = 0; from < kSquares; ++from) {
+    for (int to = 0; to < kSquares; ++to) {
       const auto f  = Square(from);
       const auto t  = Square(to);
       const int df  = std::abs(file_of(t) - file_of(f));
@@ -82,11 +82,11 @@ TEST(Attacks, UsableAtCompileTime) {
 
 TEST(SliderAttacks, EmptyBoard) {
   using enum Square;
-  EXPECT_EQ(rook_attacks(A1, BB_NONE), (BB_FILE_A | BB_RANK_1) & ~square_bb(A1));
-  EXPECT_EQ(rook_attacks(E4, BB_NONE), (BB_FILE_E | BB_RANK_4) & ~square_bb(E4));
-  EXPECT_EQ(bishop_attacks(A1, BB_NONE), squares({B2, C3, D4, E5, F6, G7, H8}));
-  EXPECT_EQ(bishop_attacks(D1, BB_NONE), squares({C2, B3, A4, E2, F3, G4, H5}));
-  EXPECT_EQ(queen_attacks(E4, BB_NONE), rook_attacks(E4, BB_NONE) | bishop_attacks(E4, BB_NONE));
+  EXPECT_EQ(rook_attacks(A1, kBbNone), (kBbFileA | kBbRank1) & ~square_bb(A1));
+  EXPECT_EQ(rook_attacks(E4, kBbNone), (kBbFileE | kBbRank4) & ~square_bb(E4));
+  EXPECT_EQ(bishop_attacks(A1, kBbNone), squares({B2, C3, D4, E5, F6, G7, H8}));
+  EXPECT_EQ(bishop_attacks(D1, kBbNone), squares({C2, B3, A4, E2, F3, G4, H5}));
+  EXPECT_EQ(queen_attacks(E4, kBbNone), rook_attacks(E4, kBbNone) | bishop_attacks(E4, kBbNone));
 }
 
 TEST(SliderAttacks, StopAtFirstBlockerAndIncludeIt) {
@@ -98,15 +98,15 @@ TEST(SliderAttacks, StopAtFirstBlockerAndIncludeIt) {
 TEST(SliderAttacks, IgnoreOccupancyOffTheirRays) {
   using enum Square;
   const Bitboard off_rays = squares({B2, C3, G6, H7, D2});
-  EXPECT_EQ(rook_attacks(E4, off_rays), rook_attacks(E4, BB_NONE));
-  EXPECT_EQ(bishop_attacks(E4, squares({E5, E3, D4, F4, A1})), bishop_attacks(E4, BB_NONE));
+  EXPECT_EQ(rook_attacks(E4, off_rays), rook_attacks(E4, kBbNone));
+  EXPECT_EQ(bishop_attacks(E4, squares({E5, E3, D4, F4, A1})), bishop_attacks(E4, kBbNone));
 }
 
 TEST(SliderAttacks, DoNotWrapAroundEdges) {
   using enum Square;
-  EXPECT_EQ(rook_attacks(H1, BB_NONE) & squares({A2, A1}), squares({A1}));
-  EXPECT_EQ(bishop_attacks(H4, BB_NONE) & BB_FILE_A, BB_NONE);
-  EXPECT_EQ(bishop_attacks(A5, BB_NONE) & BB_FILE_H, BB_NONE);
+  EXPECT_EQ(rook_attacks(H1, kBbNone) & squares({A2, A1}), squares({A1}));
+  EXPECT_EQ(bishop_attacks(H4, kBbNone) & kBbFileA, kBbNone);
+  EXPECT_EQ(bishop_attacks(A5, kBbNone) & kBbFileH, kBbNone);
 }
 
 /*
@@ -127,7 +127,7 @@ TEST(SliderAttacks, MatchSlowVersionOnRandomBoards) {
     return state;
   };
 
-  for (int s = 0; s < SQUARES; ++s) {
+  for (int s = 0; s < kSquares; ++s) {
     const auto sq = Square(s);
     for (int i = 0; i < 2000; ++i) {
       const Bitboard occupancies[] = {next() & next() & next(), next(), next() | next()};
@@ -144,7 +144,7 @@ TEST(AttacksDeathTest, AssertsOnNoSquare) {
   EXPECT_DEATH(knight_attacks(Square::None), "");
   EXPECT_DEATH(king_attacks(Square::None), "");
   EXPECT_DEATH(pawn_attacks(Color::White, Square::None), "");
-  EXPECT_DEATH(bishop_attacks(Square::None, BB_NONE), "");
-  EXPECT_DEATH(rook_attacks(Square::None, BB_NONE), "");
+  EXPECT_DEATH(bishop_attacks(Square::None, kBbNone), "");
+  EXPECT_DEATH(rook_attacks(Square::None, kBbNone), "");
 }
 #endif

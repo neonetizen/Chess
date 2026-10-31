@@ -13,24 +13,24 @@ TEST(SquareBB, GivesOneBitAtCorrectIndex) {
 }
 
 TEST(SquareOps, OrAndUseTheSquareBit) {
-  EXPECT_EQ(BB_NONE | Square::E4, square_bb(Square::E4));
-  EXPECT_EQ((BB_NONE | Square::A1 | Square::H8) & Square::H8, square_bb(Square::H8));
-  EXPECT_EQ(BB_RANK_1 & Square::A2, BB_NONE);
+  EXPECT_EQ(kBbNone | Square::E4, square_bb(Square::E4));
+  EXPECT_EQ((kBbNone | Square::A1 | Square::H8) & Square::H8, square_bb(Square::H8));
+  EXPECT_EQ(kBbRank1 & Square::A2, kBbNone);
 }
 
 TEST(Masks, FilesAndRanks) {
-  EXPECT_EQ(BB_ALL, 0xFFFFFFFFFFFFFFFFULL);
-  EXPECT_EQ(BB_FILE_H, 0x8080808080808080ULL);
-  EXPECT_EQ(BB_RANK_8, 0xFF00000000000000ULL);
-  EXPECT_EQ(popcount(BB_FILE_C), 8);
-  EXPECT_EQ(BB_FILE_D & BB_RANK_4, square_bb(Square::D4));
+  EXPECT_EQ(kBbAll, 0xFFFFFFFFFFFFFFFFULL);
+  EXPECT_EQ(kBbFileH, 0x8080808080808080ULL);
+  EXPECT_EQ(kBbRank8, 0xFF00000000000000ULL);
+  EXPECT_EQ(popcount(kBbFileC), 8);
+  EXPECT_EQ(kBbFileD & kBbRank4, square_bb(Square::D4));
 }
 
 TEST(Masks, RankAndFileOfSquare) {
-  EXPECT_EQ(rank_bb(Square::A1), BB_RANK_1);
-  EXPECT_EQ(rank_bb(Square::H8), BB_RANK_8);
-  EXPECT_EQ(file_bb(Square::E4), BB_FILE_E);
-  EXPECT_EQ(file_bb(Square::H1), BB_FILE_H);
+  EXPECT_EQ(rank_bb(Square::A1), kBbRank1);
+  EXPECT_EQ(rank_bb(Square::H8), kBbRank8);
+  EXPECT_EQ(file_bb(Square::E4), kBbFileE);
+  EXPECT_EQ(file_bb(Square::H1), kBbFileH);
   EXPECT_EQ(rank_bb(Square::C5) & file_bb(Square::C5), square_bb(Square::C5));
 }
 
@@ -46,40 +46,40 @@ TEST(Shift, ShiftsToCorrectSquare) {
 }
 
 TEST(Shift, DoesNotWrapEdges) {
-  EXPECT_EQ(shift(square_bb(Square::H1), Direction::East), BB_NONE);
-  EXPECT_EQ(shift(square_bb(Square::A4), Direction::West), BB_NONE);
-  EXPECT_EQ(shift(square_bb(Square::H8), Direction::North), BB_NONE);
-  EXPECT_EQ(shift(square_bb(Square::A1), Direction::South), BB_NONE);
-  EXPECT_EQ(shift(square_bb(Square::H5), Direction::NorthEast), BB_NONE);
-  EXPECT_EQ(shift(square_bb(Square::H5), Direction::SouthEast), BB_NONE);
-  EXPECT_EQ(shift(square_bb(Square::A5), Direction::NorthWest), BB_NONE);
-  EXPECT_EQ(shift(square_bb(Square::A5), Direction::SouthWest), BB_NONE);
+  EXPECT_EQ(shift(square_bb(Square::H1), Direction::East), kBbNone);
+  EXPECT_EQ(shift(square_bb(Square::A4), Direction::West), kBbNone);
+  EXPECT_EQ(shift(square_bb(Square::H8), Direction::North), kBbNone);
+  EXPECT_EQ(shift(square_bb(Square::A1), Direction::South), kBbNone);
+  EXPECT_EQ(shift(square_bb(Square::H5), Direction::NorthEast), kBbNone);
+  EXPECT_EQ(shift(square_bb(Square::H5), Direction::SouthEast), kBbNone);
+  EXPECT_EQ(shift(square_bb(Square::A5), Direction::NorthWest), kBbNone);
+  EXPECT_EQ(shift(square_bb(Square::A5), Direction::SouthWest), kBbNone);
 }
 
 TEST(Shift, WholeBoardLosesOneEdge) {
-  EXPECT_EQ(shift(BB_ALL, Direction::North), BB_ALL & ~BB_RANK_1);
-  EXPECT_EQ(shift(BB_ALL, Direction::East), BB_ALL & ~BB_FILE_A);
-  EXPECT_EQ(shift(BB_ALL, Direction::West), BB_ALL & ~BB_FILE_H);
-  EXPECT_EQ(shift(BB_ALL, Direction::SouthWest), BB_ALL & ~BB_FILE_H & ~BB_RANK_8);
+  EXPECT_EQ(shift(kBbAll, Direction::North), kBbAll & ~kBbRank1);
+  EXPECT_EQ(shift(kBbAll, Direction::East), kBbAll & ~kBbFileA);
+  EXPECT_EQ(shift(kBbAll, Direction::West), kBbAll & ~kBbFileH);
+  EXPECT_EQ(shift(kBbAll, Direction::SouthWest), kBbAll & ~kBbFileH & ~kBbRank8);
 }
 
 TEST(Lsb, PopsSquaresLowToHigh) {
-  Bitboard bb = BB_NONE | Square::C1 | Square::E4 | Square::H8;
+  Bitboard bb = kBbNone | Square::C1 | Square::E4 | Square::H8;
   EXPECT_EQ(popcount(bb), 3);
   EXPECT_EQ(pop_lsb(bb), Square::C1);
   EXPECT_EQ(pop_lsb(bb), Square::E4);
   EXPECT_EQ(pop_lsb(bb), Square::H8);
-  EXPECT_EQ(bb, BB_NONE);
+  EXPECT_EQ(bb, kBbNone);
 }
 
 #ifndef NDEBUG
 TEST(BitboardDeathTest, AssertsOnNoSquare) {
   EXPECT_DEATH(square_bb(Square::None), "");
-  EXPECT_DEATH(lsb(BB_NONE), "");
-  Bitboard empty = BB_NONE;
+  EXPECT_DEATH(lsb(kBbNone), "");
+  Bitboard empty = kBbNone;
   EXPECT_DEATH(pop_lsb(empty), "");
 }
 #endif
 
 static_assert(shift(square_bb(Square::E4), Direction::North) == square_bb(Square::E5));
-static_assert(lsb(BB_FILE_B) == Square::B1);
+static_assert(lsb(kBbFileB) == Square::B1);
