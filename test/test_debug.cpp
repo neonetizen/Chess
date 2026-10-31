@@ -33,7 +33,7 @@ TEST(DebugString, Bitboard) {
 }
 
 TEST(DebugString, Position) {
-  const auto pos = Position::from_fen("4k3/q7/8/8/8/8/3P4/4K3 b k d3 3 12");
+  const auto pos = Position::from_fen("4k3/q7/8/8/3Pp3/8/8/4K3 b k d3 3 12");
   ASSERT_TRUE(pos);
 
   EXPECT_EQ(to_string(*pos),
@@ -41,9 +41,9 @@ TEST(DebugString, Position) {
             "7  q . . . . . . .\n"
             "6  . . . . . . . .\n"
             "5  . . . . . . . .\n"
-            "4  . . . . . . . .\n"
+            "4  . . . P p . . .\n"
             "3  . . . . . . . .\n"
-            "2  . . . P . . . .\n"
+            "2  . . . . . . . .\n"
             "1  . . . . K . . .\n"
             "\n"
             "   a b c d e f g h\n"

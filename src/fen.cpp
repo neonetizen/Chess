@@ -153,7 +153,16 @@ std::optional<Position> Position::from_fen(std::string_view fen) {
       CHESS_ERROR("bad fen '{}': en passant square must be '-' or a square, got '{}'", fen, f[3]);
       return std::nullopt;
     }
-    pos.ep_square_ = *ep;
+    /*
+     * many FEN writers set the ep square after every double push. keeping a dead one gives the
+     * same position two different keys; only keep it if a pawn can actually take.
+     * TODO: drop it when every ep capture is illegal (pinned capturer), once movegen can tell
+     */
+    if (ep_capturable(pos, *ep)) {
+      pos.ep_square_ = *ep;
+    } else {
+      CHESS_DEBUG("fen '{}': dropping en passant square {}, no pawn can capture there", fen, f[3]);
+    }
   }
 
   constexpr int kMaxHalfmove = std::numeric_limits<decltype(pos.halfmove_clock_)>::max();
@@ -171,6 +180,8 @@ std::optional<Position> Position::from_fen(std::string_view fen) {
   pos.halfmove_clock_  = static_cast<uint8_t>(*halfmove);
   pos.fullmove_number_ = static_cast<uint16_t>(*fullmove);
 
+  pos.key_      = compute_key(pos);
+  pos.pawn_key_ = compute_pawn_key(pos);
   return pos;
 }
 

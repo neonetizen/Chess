@@ -17,6 +17,7 @@ add_executable(unit_tests
     test_fen.cpp
     test_attacks.cpp
     test_position.cpp
+    test_zobrist.cpp
 )
 
 target_link_libraries(unit_tests PRIVATE chess_core GTest::gtest)

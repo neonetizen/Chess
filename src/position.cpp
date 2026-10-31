@@ -57,9 +57,39 @@ bool is_attacked(const Position& pos, Square sq, Color by) {
          (rook_attacks(sq, occupied) & (pos.pieces(PieceType::Rook) | queens) & pos.pieces(by)) != kBbNone;
 }
 
+bool ep_capturable(const Position& pos, Square ep) {
+  // a pawn attacks ep exactly when an enemy pawn standing on ep would attack it
+  return (pawn_attacks(~pos.side_to_move(), ep) & pos.pieces(pos.side_to_move(), PieceType::Pawn)) != kBbNone;
+}
+
+Key compute_key(const Position& pos) {
+  CHESS_TRACE_FUNC();
+  Key key = 0;
+  for (int sq = 0; sq < kSquares; ++sq) key ^= zobrist::piece_square(pos.piece_on(Square(sq)), Square(sq));
+  key ^= zobrist::castling(pos.castling());
+  if (pos.ep_square() != Square::None) key ^= zobrist::ep(pos.ep_square());
+  if (pos.side_to_move() == Color::Black) key ^= zobrist::side();
+  return key;
+}
+
+Key compute_pawn_key(const Position& pos) {
+  CHESS_TRACE_FUNC();
+  Key key = 0;
+  for (Bitboard pawns = pos.pieces(PieceType::Pawn); pawns != kBbNone;) {
+    const Square sq = pop_lsb(pawns);
+    key ^= zobrist::piece_square(pos.piece_on(sq), sq);
+  }
+  return key;
+}
+
 bool is_valid(const Position& pos) {
   CHESS_TRACE_FUNC();
   if (!bitboards_match_board(pos)) return false;
+
+  if (pos.key() != compute_key(pos) || pos.pawn_key() != compute_pawn_key(pos)) {
+    CHESS_ERROR("invalid position: zobrist key doesn't match the position");
+    return false;
+  }
 
   for (int c = 0; c < kColors; ++c) {
     const int kings = popcount(pos.pieces(Color(c), PieceType::King));
@@ -96,6 +126,11 @@ bool is_valid(const Position& pos) {
     if (rank_of(pos.ep_square()) != ep_rank || pos.piece_on(Square(pushed_pawn_sq)) != pawn ||
         pos.piece_on(Square(ep)) != Piece::None || pos.piece_on(Square(push_origin_sq)) != Piece::None) {
       CHESS_ERROR("invalid position: en passant square {} doesn't follow a double pawn push",
+                  to_string(pos.ep_square()));
+      return false;
+    }
+    if (!ep_capturable(pos, pos.ep_square())) {
+      CHESS_ERROR("invalid position: en passant square {} is set but no pawn can capture there",
                   to_string(pos.ep_square()));
       return false;
     }

@@ -9,6 +9,7 @@
 
 #include "bitboard.hpp"
 #include "primitives.hpp"
+#include "zobrist.hpp"
 
 namespace chess {
 
@@ -34,25 +35,35 @@ class alignas(64) Position {
   constexpr int halfmove_clock() const { return halfmove_clock_; }
   constexpr int fullmove_number() const { return fullmove_number_; }
 
+  // zobrist hash of the whole position and pawns alone
+  constexpr Key key() const { return key_; }
+  constexpr Key pawn_key() const { return pawn_key_; }
+
   // places a piece on an empty square
   constexpr void put_piece(Piece p, Square sq) {
     assert(p != Piece::None && board_[peel(sq)] == Piece::None);
-    const Bitboard bb = square_bb(sq);
-    board_[peel(sq)]  = p;
-    by_type_[peel(type_of(p))] |= bb;
+    const PieceType pt = type_of(p);
+    const Bitboard bb  = square_bb(sq);
+    board_[peel(sq)]   = p;
+    by_type_[peel(pt)] |= bb;
     by_type_[kAll] |= bb;
     by_color_[peel(color_of(p))] |= bb;
+    key_ ^= zobrist::piece_square(p, sq);
+    if (pt == PieceType::Pawn) pawn_key_ ^= zobrist::piece_square(p, sq);
   }
 
   // takes a piece off an occupied square
   constexpr void remove_piece(Square sq) {
     const Piece p = board_[peel(sq)];
     assert(p != Piece::None);
-    const Bitboard bb = square_bb(sq);
-    board_[peel(sq)]  = Piece::None;
-    by_type_[peel(type_of(p))] &= ~bb;
+    const PieceType pt = type_of(p);
+    const Bitboard bb  = square_bb(sq);
+    board_[peel(sq)]   = Piece::None;
+    by_type_[peel(pt)] &= ~bb;
     by_type_[kAll] &= ~bb;
     by_color_[peel(color_of(p))] &= ~bb;
+    key_ ^= zobrist::piece_square(p, sq);
+    if (pt == PieceType::Pawn) pawn_key_ ^= zobrist::piece_square(p, sq);
   }
 
   bool operator==(const Position&) const = default;
@@ -62,6 +73,8 @@ class alignas(64) Position {
 
   Bitboard by_type_[kTypes + 1]{};
   Bitboard by_color_[kColors]{};
+  Key key_      = 0;
+  Key pawn_key_ = 0;
   Piece board_[kSquares]{};                  // "redundancy" for checking piece locations without probing each array
   Color side_to_move_       = Color::White;  // drives movegen
   CastlingRights castling_  = CastlingRights::None;  // 4-bit enum updated by hand-rules
@@ -76,7 +89,13 @@ static_assert(std::is_trivially_copyable_v<Position> && std::is_standard_layout_
 // true if any piece of color by attacks sq
 bool is_attacked(const Position& pos, Square sq, Color by);
 
-// true if the position is legal chess and its board[]/bitboards agree
+// true if a pawn of the side to move attacks the en passant square
+bool ep_capturable(const Position& pos, Square ep);
+
+Key compute_key(const Position& pos);
+Key compute_pawn_key(const Position& pos);
+
+// true if the position is legal chess and its board[]/bitboards/keys agree
 bool is_valid(const Position& pos);
 
 }  // namespace chess
